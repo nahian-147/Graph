@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+    <style>
+        :root {
+        --root-font-size: 12px;
+        --bg: #3e4045;
+        }
+
+        /** Reset */
+        html, body, nav, ul, h1, h2, h3, h4, a, canvas {
+            margin: 0px;
+            padding: 0px;
+            color: var(--text-color);
+        }
+        html, body {
+            font-family: monospace;
+            font-size: var(--root-font-size);
+            background: var(--bg);
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        *, body, button, input, select, textarea, canvas {
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            outline: 0;
+        }
+    </style>
+
+    <body>
+        <canvas></canvas>
+    </body>
+
+<!-- <body>
+
+<div style="width: 80%;margin: 0 auto;padding: 10px;background: #676767;">
+    <table style="width: 100%;">
+        <tr>
+            <td>
+                <canvas id="canvas" style="border:4px solid #4611d7;width: 50%;height: 600px;margin-left: auto;margin-right: auto;margin-top: auto;margin-bottom: auto;background: #e6e3fb;"></canvas>
+            </td>
+        </tr>
+    </table>
+</div>
+
+</body> -->
+
+<script>
+    const canvas = document.querySelector('canvas');
+    const context = canvas.getContext('2d');
+
+    var nodes = [];
+    var edges = [];
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    window.onresize = resize;
+    resize();
+
+    function drawNode(node) {
+        context.beginPath();
+        context.fillStyle = node.fillStyle;
+        context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
+        context.strokeStyle = node.strokeStyle;
+        context.stroke();
+        context.fill();
+        }
+    // function click(e) {
+    //     let node = {
+    //         x: e.x,
+    //         y: e.y,
+    //         radius: 7,
+    //         fillStyle: '#5511ff',
+    //         strokeStyle: '#5200f8'
+    //     };
+    //     nodes.push(node);
+    //     draw();
+    // }
+
+    var selection = undefined;
+
+    function within(x, y) {
+        return nodes.find(n => {
+            return x > (n.x - n.radius) && 
+                y > (n.y - n.radius) &&
+                x < (n.x + n.radius) &&
+                y < (n.y + n.radius);
+        });
+    }
+
+    function move(e) {
+    if (selection && e.buttons) {
+        selection.x = e.x;
+        selection.y = e.y;
+        draw();
+    }
+    }
+
+    function draw() {
+        context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+        for (let i = 0; i < nodes.length; i++) {
+            let node = nodes[i];
+            context.beginPath();
+            context.fillStyle = context.fillStyle = node.selected ? node.selectedFill : node.fillStyle;
+            context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
+            context.strokeStyle = node.strokeStyle;
+            context.fill();
+            context.stroke();
+        }
+        
+        for (let i = 0; i < edges.length; i++) {
+            let fromNode = edges[i].from;
+            let toNode = edges[i].to;
+            context.beginPath();
+            context.strokeStyle = fromNode.strokeStyle;
+            context.moveTo(fromNode.x, fromNode.y);
+            context.lineTo(toNode.x, toNode.y);
+            context.stroke();
+    }
+
+    }
+
+    function down(e) {
+    let target = within(e.x, e.y);
+    if (selection && selection.selected) {
+        selection.selected = false;
+    }
+    if (target) {
+        if (selection && selection !== target) {
+            edges.push({ from: selection, to: target });
+        }
+        selection = target;
+        selection.selected = true;
+        draw();
+    }
+    }
+
+    function up(e) {
+    if (!selection || !selection.moving) {
+        let node = {
+            x: e.x,
+            y: e.y,
+            radius: 7,
+            fillStyle: '#5511ff',
+            strokeStyle: '#5200f8',
+            selectedFill: '#ff1031',
+            selected: false
+        };
+        nodes.push(node);
+        draw();
+    }
+    if (selection && !selection.selected) {
+        selection = undefined;
+    }
+    draw();
+    }
+
+    window.onmousemove = move;
+    window.onmousedown = down;
+    window.onmouseup = up;
+
+</script>
+
+<!-- <script>
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
+
+function drawVertex(x,y){
+    var centerX = x;
+    var centerY = y;
+    var radius = 2;
+
+    context.beginPath();
+    context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+    context.fillStyle = 'black';
+    context.fill();
+    context.lineWidth = 1;
+    context.strokeStyle = '#000000';
+    context.stroke();
+}
+drawVertex(100,100);
+drawVertex(100,50);
+drawVertex(150,70);
+drawVertex(70,80);
+
+context.beginPath();
+context.moveTo(100,100);
+context.lineTo(100,50);
+context.lineTo(150,70);
+context.lineTo(70,80);
+
+
+context.lineWidth = 1;
+context.strokeStyle = 'blue';
+context.stroke();
+</script> -->
+
+
+</body>
+</html>
